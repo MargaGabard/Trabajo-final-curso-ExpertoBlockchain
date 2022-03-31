@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.1;
+
+import "./FumiTokenColeccion.sol";
+
+// Este contrato hereda de FUMITOKEN 
+//Token de drones
+contract DronTokenColeccion is  FumiTokenColeccion  {
+//using Counters for Counters.Counter;
+
+struct datosDron {
+    uint64 costeVueloDron;
+    uint64 autonomia;
+    uint64 m2_por_minuto;
+
+}
+mapping(uint64 => datosDron) listaDetalleDron;
+
+   //constructor(string memory name, string memory symbol) FumiToken(name,symbol) {}
+
+   constructor(string memory name, string memory symbol)  FumiTokenColeccion(name, symbol)  {}
+
+   event eventmintDron (uint64 tokenId, address to, address muyself);
+   function mint(address to, uint64 alturaMax, uint64 alturaMin, uint64 costeVuelo, uint64 autonomia, uint64 m2_por_minuto, uint64[] memory fertilizantes)  public returns (uint64 result)     {
+  
+        uint64 tokenId = super.mint(to, alturaMax, alturaMin, fertilizantes);          
+        listaDetalleDron[tokenId].autonomia = autonomia;
+        listaDetalleDron[tokenId].costeVueloDron = costeVuelo;
+        listaDetalleDron[tokenId].m2_por_minuto = m2_por_minuto;
+        emit eventmintDron(tokenId,to,address(this));
+        super.incrementoIndexToken();
+        return tokenId;
+        
+    }
+
+    function getDatosDron(uint64 idToken) public view returns (uint64 costeVuelo, uint64 autonomia, uint64 m2_por_minuto, uint64 alturamax, uint64 alturamin)
+    {
+           return ( listaDetalleDron[idToken].costeVueloDron , listaDetalleDron[idToken].autonomia , listaDetalleDron[idToken].m2_por_minuto,  super.getAlturaMaxima(idToken), super.getAlturaMinima(idToken) );
+    }
+
+    function getAutonomiaDron(uint64 idToken) public view returns (uint64 autonomia)
+    {
+           return (listaDetalleDron[idToken].autonomia);
+    }
+
+    function getCosteVueloDron(uint64 idToken) public view returns (uint64 costeVuelo)
+    {
+           return (listaDetalleDron[idToken].costeVueloDron);
+    }
+
+    
+    function getm2MinutoDron(uint64 idToken) public view returns (uint64 m2porminuto)
+    {
+           return (listaDetalleDron[idToken].m2_por_minuto);
+    }
+
+  
+   
+    
+
+}
