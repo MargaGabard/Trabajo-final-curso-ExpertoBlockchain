@@ -1,0 +1,12 @@
+const FumigaSA = artifacts.require("FumigaSA");
+module.exports = function (deployer) {
+  deployer.deploy(FumigaSA);
+};
+
+const FumToken = artifacts.require("FumToken");
+module.exports = function (deployer) {
+  deployer.deploy(FumToken);
+};
+
+
+

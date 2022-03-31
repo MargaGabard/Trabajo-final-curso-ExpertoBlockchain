@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		
+		<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>FUMIGA SA front-end</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- load MUI -->
+		<link href="//cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+		<script src="//cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.35/dist/web3.min.js"></script>
+	</head>  
+	 
+	 <body>
+      <script>
+		//ABI del contrato FUMTOKEN
+	    const ABI_FUMTOKEN = [ { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "approve", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "subtractedValue", "type": "uint256" } ], "name": "decreaseAllowance", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "addedValue", "type": "uint256" } ], "name": "increaseAllowance", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "mint", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "transfer", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" } ], "name": "allowance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "account", "type": "address" } ], "name": "balanceOf", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "decimals", "outputs": [ { "internalType": "uint8", "name": "", "type": "uint8" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "name", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" } ];
+
+        //ABI del contrato FUMIGASA
+        const ABI_FUMIGASA =[ { "inputs": [ { "internalType": "uint256", "name": "idDron", "type": "uint256" }, { "internalType": "uint256", "name": "idParcela", "type": "uint256" }, { "internalType": "uint256", "name": "idPestizida", "type": "uint256" } ], "name": "contratarFumigacion", "outputs": [ { "internalType": "bool", "name": "result", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "idDron", "type": "uint256" }, { "internalType": "uint256", "name": "idParcela", "type": "uint256" } ], "name": "costeFumigacionDronParcela", "outputs": [ { "internalType": "uint256", "name": "result", "type": "uint256" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "alturaMax", "type": "uint256" }, { "internalType": "uint256", "name": "alturaMin", "type": "uint256" }, { "internalType": "uint256", "name": "costeVuelo", "type": "uint256" }, { "internalType": "uint256", "name": "autonomia", "type": "uint256" }, { "internalType": "uint256", "name": "m2_por_minuto", "type": "uint256" }, { "internalType": "uint256[]", "name": "fertilizantes", "type": "uint256[]" } ], "name": "crearDron", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "uint256", "name": "idDron", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "idParcela", "type": "uint256" }, { "indexed": false, "internalType": "enum FumigaSA.estadoContratacion", "name": "estado", "type": "uint8" } ], "name": "ParcelaFumigadaLog", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "uint256", "name": "idDron", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "idParcela", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "idPestizida", "type": "uint256" }, { "indexed": false, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "bool", "name": "result", "type": "bool" } ], "name": "contratarFumigacionLog", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "uint256", "name": "costevuelo", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "recargas", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "autonomia", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "minutosvuelo", "type": "uint256" } ], "name": "costeFumiLog", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "uint256", "name": "TokenId", "type": "uint256" } ], "name": "crearDronLog", "type": "event" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "alturaMax", "type": "uint256" }, { "internalType": "uint256", "name": "alturaMin", "type": "uint256" }, { "internalType": "uint256", "name": "m2superfice", "type": "uint256" }, { "internalType": "uint256[]", "name": "fertilizantes", "type": "uint256[]" } ], "name": "crearParcela", "outputs": [ { "internalType": "uint256", "name": "result", "type": "uint256" } ], "stateMutability": "nonpayable", "type": "function" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "uint256", "name": "TokenId", "type": "uint256" } ], "name": "crearParcelaLog", "type": "event" }, { "inputs": [ { "internalType": "uint256", "name": "idDron", "type": "uint256" } ], "name": "dronDisponible", "outputs": [ { "internalType": "bool", "name": "result", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "idDronFumigar", "type": "uint256" }, { "internalType": "uint256", "name": "idParcelaFumigar", "type": "uint256" } ], "name": "fumigacionParcela", "outputs": [ { "internalType": "bool", "name": "result", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "operator", "type": "address" }, { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" }, { "internalType": "bytes", "name": "data", "type": "bytes" } ], "name": "onERC721Received", "outputs": [ { "internalType": "bytes4", "name": "", "type": "bytes4" } ], "stateMutability": "nonpayable", "type": "function" }, { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "uint256", "name": "parcela", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "estado", "type": "uint256" } ], "name": "situacion", "type": "event" }, { "inputs": [ { "internalType": "uint256", "name": "idDron", "type": "uint256" } ], "name": "situacionDron", "outputs": [ { "internalType": "uint256", "name": "IdParcela", "type": "uint256" }, { "internalType": "uint256", "name": "idEstado", "type": "uint256" }, { "internalType": "uint256", "name": "pestizida", "type": "uint256" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "newOwner", "type": "address" } ], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "idDron", "type": "uint256" }, { "internalType": "uint256", "name": "idParcela", "type": "uint256" } ], "name": "compatibilidadDronParcela", "outputs": [ { "internalType": "bool", "name": "result", "type": "bool" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "contract_DronToken", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "contract_ParcelaToken", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "idDron", "type": "uint256" } ], "name": "datosDron", "outputs": [ { "internalType": "uint256", "name": "costeVuelo", "type": "uint256" }, { "internalType": "uint256", "name": "autonomia", "type": "uint256" }, { "internalType": "uint256", "name": "m2_por_minuto", "type": "uint256" }, { "internalType": "uint256", "name": "alturamax", "type": "uint256" }, { "internalType": "uint256", "name": "alturamin", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "idParcela", "type": "uint256" } ], "name": "datosParcela", "outputs": [ { "internalType": "uint256", "name": "m2superfice", "type": "uint256" }, { "internalType": "uint256", "name": "alturamax", "type": "uint256" }, { "internalType": "uint256", "name": "alturamin", "type": "uint256" }, { "internalType": "address", "name": "owner_parcela", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "idToken", "type": "uint256" } ], "name": "getListaPestizidassDron", "outputs": [ { "internalType": "uint256[]", "name": "pestizidas", "type": "uint256[]" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "idToken", "type": "uint256" } ], "name": "getListaPestizidassParcela", "outputs": [ { "internalType": "uint256[]", "name": "pestizidas", "type": "uint256[]" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getTotalDrones", "outputs": [ { "internalType": "uint256", "name": "numTotalDrones", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getTotalParcelas", "outputs": [ { "internalType": "uint256", "name": "numTotalParcelas", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "name": "listaFumigaciones", "outputs": [ { "internalType": "uint256", "name": "idParcela", "type": "uint256" }, { "internalType": "enum FumigaSA.estadoContratacion", "name": "estado", "type": "uint8" }, { "internalType": "uint256", "name": "idPestizida", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" } ], "name": "listParcelasPropietario", "outputs": [ { "internalType": "uint256[]", "name": "", "type": "uint256[]" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "owner", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" } ];
+        
+		//Variables
+		
+		var instanciaEmpresa; 
+        var instanciaTokenERC20;
+		var web3;
+		var cuentaUsuario;
+		var cuentaEmpresa;
+		
+		
+		
+		
+        async function start() {
+		
+				window.addEventListener('load', async () => {
+				if (window.ethereum) {
+				
+					console.log("Metamask detected!!!");
+					
+					web3 = new Web3(window.ethereum);
+					await window.ethereum.enable();
+					
+					cuentaEmpresa="0xe141417Ac560C12824f9E1150c1b6517950Ded2E";
+					instanciaTokenERC20= await new web3.eth.Contract(ABI_FUMTOKEN, "0xb55c2b02F2d7A8bA7A64585769f77710568485c6"); 	
+					instanciaEmpresa= await new web3.eth.Contract(ABI_FUMIGASA, "0x097Fa541cDEd1178CBB983A63E3f47f3602AeAB7");
+				 
+					var accounts = await web3.eth.getAccounts();
+					  
+						
+					var accountInterval = setInterval( async function() {
+					// Check if account has changed
+					//console.log("Cuentas de usuario", web3.eth.accounts[0]);
+					//console.log("CuentaUsuario", cuentaUsuario);
+				
+				    var accounts = await web3.eth.getAccounts();
+					var cuenta0 =  accounts[0];
+					
+					if (cuenta0 !== cuentaUsuario)	{
+						cuentaUsuario = cuenta0;
+						// Call a function to update the UI with the new account
+					//	getZombiesByOwner(userAccount)
+						getTotalDrones()
+						.then(displayDrones);
+						//displayParcelasPropietario(cuentaUsuario);
+						pintarBalance(cuentaUsuario);
+						getTotalParcelas().then(displayParcelas);
+					}
+				}, 100);
+				
+			}
+			else {console.error("Metamask not detected");}
+			});
+			}
+		
+		
+        start();
+		
+	   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	  ///////////////////////  FUNCION ALTA DRON //////////////////////////////////////////////////////////////////////////////////////////////////////
+	  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+	
+	    async function altaDron (alturaMax,alturaMin, m2porminuto, autonomia, costeVuelo)
+		{
+		
+		var selectedFerti = new Array();
+		
+		selectedFerti=await GetCheckedVal("Dron");
+		 
+		 
+					
+		let estimadoGas = await instanciaEmpresa.methods.crearDron(cuentaUsuario,alturaMax,alturaMin, costeVuelo, autonomia, m2porminuto, selectedFerti).estimateGas({gas: 5000000});
+		
+		var result= await instanciaEmpresa.methods.crearDron(cuentaUsuario,alturaMax,alturaMin, costeVuelo, autonomia, m2porminuto, selectedFerti).send({from: cuentaUsuario, gas: parseInt(estimadoGas)});
+        document.getElementById('console').innerHTML = document.getElementById('console').innerHTML+"<br>"+result;
+		document.getElementById('idResult').value= result.transactionHash;
+		getTotalDrones().then(displayDrones);
+/*        
+		instanciaEmpresa.methods.crearDron(cuentaUsuario,alturaMax,alturaMin, costeVuelo, autonomia, m2porminuto, selectedFerti).send({from: cuentaUsuario, gas: parseInt(estimadoGas)},function (error, result)
+				{
+				if(!error){
+				      console.log("creado dron");
+                      console.log(result);
+                      document.getElementById('console').innerHTML = document.getElementById('console').innerHTML+"<br>"+result;
+					 
+                }
+                else
+				      console.log("Error creación dron");
+                      console.error(error);
+				 } 
+				 );	 
+		
+*/
+	
+		
+		event.preventDefault();
+		event.stopPropagation();
+		
+		
+		
+		}
+		
+	   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	  ///////////////////////  FUNCION ALTA PARCELA //////////////////////////////////////////////////////////////////////////////////////////////////////
+	  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		
+		async function altaParcela (alturaMax,alturaMin, m2superficie)
+		{
+		
+		var selectedFerti = new Array();
+		
+		selectedFerti=await GetCheckedVal("Parcela");
+	
+		
+		   let estimadoGas = await instanciaEmpresa.methods.crearParcela(cuentaUsuario,alturaMax,alturaMin, m2superficie, selectedFerti).estimateGas({gas: 5000000});
+		
+		   console.log("gas:",estimadoGas);
+		   instanciaEmpresa.methods.crearParcela(cuentaUsuario,alturaMax,alturaMin, m2superficie, selectedFerti).send({from: cuentaUsuario, gas: parseInt(estimadoGas)},function (error, result)
+		   {
+				if(!error){
+				      console.log("creada parcela");       
+					  document.getElementById('idResult').value= result;
+                      document.getElementById('console').innerHTML = document.getElementById('console').innerHTML+"<br>"+result;
+					  document.getElementById('idResult').value= result.transactionHash;
+                }
+                else
+				      console.log("Error creación parcela");
+                      console.error(error);
+				 } 
+			);	 
+		
+		displayParcelasPropietario(cuentaUsuario);
+		
+		}
+		
+			
+	   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	  ///////////////////////  FUNCION COMPATIBILIDAD DRON-PARCELA //////////////////////////////////////////////////////////////////////////////////////////////////////
+	  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			
+		function compatibilidadDronParcela (idDron,idParcela)
+		{
+			 console.log("Va a llamar a metodo de compatbilidad con Dron", idDron);
+			 console.log("Va a llamar a metodo de compatbilidad con parcela", idParcela);
+ 
+			instanciaEmpresa.methods.compatibilidadDronParcela(idDron,idParcela).call().then
+					(result => {
+						console.log("Resultado compatibilidad:", result);
+						document.getElementById('idResult').value= result;
+						//document.getElementById('console').innerHTML = document.getElementById('console').innerHTML+"<br>"+result;	
+					}).catch(error => console.log(error));
+												
+		}
+		
+		
+	   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	  ///////////////////////  FUNCION COSTE FUMIGACION //////////////////////////////////////////////////////////////////////////////////////////////////////
+	  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		async function  costeFumigacionDronParcela(idDron, idParcela){
+		//	var numTokens;
+		
+		
+		    var numTokens= await instanciaEmpresa.methods.costeFumigacionDronParcela(idDron,idParcela).call();
+			document.getElementById('idResult').value= numTokens;
+			//document.getElementById('console').innerHTML = document.getElementById('console').innerHTML+"<br>"+numTokens;	
+			console.log("Resultado coste fumigacion:", numTokens);
+			return numTokens;
+		}
+		
+	   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	  ///////////////////////  FUNCION CONTRATAR FUMIGACION //////////////////////////////////////////////////////////////////////////////////////////////////////
+	  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+			async function contratarFumigacion(idDron, idParcela,idFerti){
+		
+			//	let cuentaDestino =  identidad.AddressTo.value;
+				let numTokens=  await costeFumigacionDronParcela(idDron,idParcela);
+				console.log("numero tokens: ", numTokens);
+				
+				numTokens= (numTokens * 10000000000);
+				numTokens=numTokens.toFixed(0);
+				console.log("numero tokens multiplicado: ", numTokens);
+				
+			
+			    let gasTransfer = await instanciaTokenERC20.methods.transfer(cuentaEmpresa,numTokens).estimateGas({gas: 5000000});
+				console.log("Voy a llamar a transfer", gasTransfer);
+				console.log("Voy a pagar a:",cuentaEmpresa);	
+				console.log("Con cuenta usuario:",cuentaUsuario);	
+		
+				let resultado= await instanciaTokenERC20.methods.transfer(cuentaEmpresa,numTokens).send({gas: 5000000, from: cuentaUsuario});
+				if (resultado.status== false)
+				{
+					document.getElementById('console').innerHTML = document.getElementById('console').innerHTML+"<br>"+"Error al transferir tokens";
+				}
+				console.log("Antes de contratar fumigación");
+			    var gasContratacio = await instanciaEmpresa.methods.contratarFumigacion(idDron,idParcela,idFerti).estimateGas({gas: 5000000});
+				//Contrato fumigación
+				console.log("Voy a llamar a fumigar", gasContratacio);
+				instanciaEmpresa.methods.contratarFumigacion(idDron,idParcela,idFerti).send({gas: parseInt(gasContratacio), from: cuentaUsuario}).then
+					(result => {
+						console.log("Resultado contratar fumigación:", result);	
+						document.getElementById('idResult').value= result;
+					}).catch(error => console.log(error));
+				
+				getTotalDrones().then(displayDrones);
+					
+			}
+	  
+	  
+	  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	  ///////////////////////  FUNCION DISPONIBLIDA DDRON //////////////////////////////////////////////////////////////////////////////////////////////////////
+	  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	  
+			function disponiblidadDron(idDron){
+	
+				instanciaEmpresa.methods.dronDisponible(idDron).call(function(error, result){
+				if(!error){
+				      console.log("resultado disponibilidad:", result);
+					  document.getElementById('idResult').value= result;
+                    //  document.getElementById('console').innerHTML = document.getElementById('console').innerHTML+"<br>"+result;
+                }
+                else
+				{
+				      console.log("Error funcion disponiblidad");
+                      console.error(error);
+				}}
+				);	 
+			}
+	  
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////// CONSULTAR FERTILIZANTES DRON //////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+			function disponiblidadDron(idDron){
+	
+				instanciaEmpresa.methods.dronDisponible(idDron).call(function(error, result){
+				if(!error){
+				      console.log("resultado disponibilidad:", result);
+					  document.getElementById('idResult').value= result;
+                     // document.getElementById('console').innerHTML = document.getElementById('console').innerHTML+"<br>"+result;
+                }
+                else
+				{
+				      console.log("Error funcion disponiblidad");
+                      console.error(error);
+				}}
+				);	 
+			}
+			
+	 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////// FUMIGAR UNA PARCELA /////////////////////////////////////// //////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	  
+			async function fumigar(idDron,idParcela){
+							
+				let estimadoGas = await instanciaEmpresa.methods.fumigacionParcela(idDron,idParcela).estimateGas({gas: 5000000});
+				let result= await instanciaEmpresa.methods.fumigacionParcela(idDron,idParcela).send({from: cuentaUsuario, gas: parseInt(estimadoGas)});
+				document.getElementById('idResult').value= result.transactionHash;
+				getTotalDrones().then(displayDrones);
+			 
+			}
+	  
+	  
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////// GENERAR LISTA DE DRONES //////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+		
+	///////////////////////////////////UTILIDADES ///////////////////////////////////////////////////////////////////////////
+	
+	function GetCheckedVal(tipo) {
+		console.log("Estoy en función get:", tipo);
+		var selected = new Array();
+		
+		if (tipo="Dron"){
+			$("#resultados").html("");
+			$("input[type='checkbox'][name='fertilizanteDron']:checked").each(function() {
+			  console.log("Estoy dentro bucle");
+			  selected.push($(this).val());
+			 $("#resultados").append($(this).val()+" - "+$("label[for='"+$(this).attr("id")+"']").text()+"<br>");
+			 
+			});
+		}
+		if (tipo="Parcela"){
+		console.log("Estoy dentro ELSE parcela");
+			$("#resultados").html("");
+			$("input[type='checkbox'][name='fertilizantePar']:checked").each(function() {
+			  console.log("Estoy dentro bucle parcela");
+			  selected.push($(this).val());
+			 $("#resultados").append($(this).val()+" - "+$("label[for='"+$(this).attr("id")+"']").text()+"<br>");
+			 
+			});
+		}
+		
+		
+		
+	console.log("selected:", selected);
+	return selected;
+}
+
+		
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	async function getTotalDrones() {
+		console.log("Entro en total drones");
+		var totalDrones= await instanciaEmpresa.methods.getTotalDrones().call();
+		return totalDrones;
+    }
+	
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	async function getDronDetalles(idDron) {
+        var detalleDron= await instanciaEmpresa.methods.datosDron(idDron).call();
+		return detalleDron;
+    
+	}
+	
+	async function getParcelaDetalles(idParcela) {
+        var detalleParcela= await instanciaEmpresa.methods.datosParcela(idParcela).call();
+		return detalleParcela;
+    
+	}
+	
+	async function getListaPestizidassDron(idDron) {
+		var listaFertis= new Array();
+        var listaFertis= await instanciaEmpresa.methods.getListaPestizidassDron(idDron).call();
+		return listaFertis;
+    }
+	
+	async function getListaPestizidasParcelas(idParcela) {
+		var listaFertis= new Array();
+        var listaFertis= await instanciaEmpresa.methods.getListaPestizidassParcela(idParcela).call();
+		return listaFertis;
+    }
+	
+	///////////////////////////Devuelve un array con id de parcelas correspondientes a un address //////////////////////////
+	
+	async function getlistParcelasPropietario(owner) {
+        var listaParcelas= await instanciaEmpresa.methods.listParcelasPropietario(owner).call();
+		return listaParcelas;
+    }
+	
+	///////////////////////////Devuelve número total de parcelas que hay //////////////////////////
+	async function getTotalParcelas() {
+	    console.log("Entro en total parcelas");
+        var totalParcelas= await instanciaEmpresa.methods.getTotalParcelas().call();
+		console.log("Total de parcelas a listar",totalParcelas);
+		return totalParcelas;
+    }
+	
+	async function balanceUsuario(address){
+	
+	    var balance= await instanciaTokenERC20.methods.balanceOf(address).call();
+		return balance;
+	
+	}
+	
+	async function situacionDron(idDron){
+		console.log("va a ejecutar situacionDron con idDron: ", idDron);
+
+		var objeto= await instanciaEmpresa.methods.situacionDron(idDron).call();
+		console.log("entro en situación dron: ",objeto);
+		return objeto;
+
+	}
+	
+	
+	
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	 async function displayDrones(totalDrones) {
+	 
+	 console.log("Entro en displayDrones");
+	 var ids = await getTotalDrones();
+	 var id=0;
+	 var listaPestizidas= new Array();
+	 var estado;
+	 var pestizida;
+	 var parcela;
+	 
+	 var idParcela;
+	 var estado;
+	 var idPestizida;
+	 
+	 var text=`<table class="mui-table mui-table--bordered">
+		<thead>
+		<tr>
+		<th valign="middle" style="color:#0000FF" >DRONES</th>
+		</tr>
+		</thead>
+		<table class="mui-table mui-table--bordered">
+		<thead>
+		<tr>
+		<th >Id</th>
+		<th>Altura máx.</th>
+		<th>Altura mín.</th>
+		<th>Autonomía (minutos)</th>
+		<th>Fertilización (m2/minuto)</th>
+		<th>Coste</th>
+		<th>Pestizidas</th>
+		<th>Situación Fumigacion</th>
+		
+		</tr>
+		</thead>
+		<tbody> `;
+		var text2="";
+	 
+
+		for (let id = 1; id <= ids; id++) {
+
+		
+	
+          // Busca todos los Drones en nuestro contrato. Devuelve un objeto `dron` object
+          await getDronDetalles(id)
+          .then(async function(dron) {
+			listaPestizidas = await getListaPestizidassDron (id);
+			result= await situacionDron(id);
+			
+			switch (result.idEstado) {
+				  case '0':
+					estado="Sin asignación";
+					break;
+				  case '1':
+					estado="Fumigación activa";
+					break;
+				  case '2':
+					estado="Fumigacion finalizada";
+					break;
+				  default:
+					estado="Indeterminada";
+					break;
+				}
+				
+				switch (result.pestizida) {
+				  case '1':
+					pestizida="A";
+					break;
+				  case '2':
+					pestizida="B";
+					break;
+				  case '3':
+					pestizida="C";
+					break;
+				case '4':
+					pestizida="D";
+					break;
+				case '5':
+					pestizida="E";
+					break;
+				  default:
+					pestizida="pdte.";
+					break;	
+				}
+				if (result.IdParcela == 0){
+					parcela="pdte.";
+				}else
+					parcela=result.IdParcela;
+				
+			text2=`
+			<tr>
+                <td>${id}</td>
+                <td>${dron.alturamax}</td>
+				<td>${dron.alturamin}</td>
+				<td>${dron.autonomia}</td>
+				<td>${dron.m2_por_minuto}</td>
+				<td>${dron.costeVuelo}</td>
+				<td>${listaPestizidas} </td>
+				<td>Parcela :${parcela} / Estado :${estado} / Pestizida :${pestizida}</td>	
+            </tr>`;				
+    
+			
+		    text = await (text.concat(" ", text2));
+				
+		    		
+          });
+        }
+		var text3=`</tbody>
+	    </table>`;
+		text = await (text.concat(" ", text3));
+		
+		$("#listaDrones").empty();
+		$("#listaDrones").append(text);
+
+	}
+	
+	//////////////////////////////////////////PINTA POR PANTALLA TODAS LAS PARCELAS////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	
+	 async function displayParcelas() {
+	 
+	 var ids = await getTotalParcelas();
+	 var id=0;
+	 var listaPestizidas= new Array();
+	 
+	 console.log("voy a listar parcelas",ids);
+	 
+	 var text=`<table class="mui-table mui-table--bordered">
+		<thead>
+		<tr>
+		<th valign="middle" style="color:#0000FF">PARCELAS </th>
+		</tr>
+		<tr>
+		<th>Propietario</th>
+		<th>Id</th>
+		<th>Altura máx.</th>
+		<th>Altura mín.</th>
+		<th>Superficie (m2) </th>
+		<th>Pestizidas</th>
+		</tr>
+		</thead>
+		<tbody> `;
+		var text2="";
+	 
+
+		for (let id = 1; id <= ids; id++) {
+
+          // Busca todos las parcelas en nuestro contrato. Devuelve un objeto `parcela` object
+          await getParcelaDetalles(id)
+          .then(async function(parcela) {
+			listaPestizidas = await getListaPestizidasParcelas (id);
+			text2=`
+			<tr>
+                <td>${parcela.owner_parcela}</td>
+				<td>${id}</td>
+                <td>${parcela.alturamax}</td>
+				<td>${parcela.alturamin}</td>
+				<td>${parcela.m2superfice}</td>
+				<td>${listaPestizidas} </td>	
+            </tr>`;
+			
+		    text = await (text.concat(" ", text2));
+					
+          });
+        }
+		var text3=`</tbody>
+	    </table>`;
+		text = await (text.concat(" ", text3));
+		
+		$("#listaParcelas").empty();
+		$("#listaParcelas").append(text);
+
+	}
+	
+	//////////////////////////////////////////PINTA POR PANTALLA TODAS LAS PARCELAS DE UN USUARIO (ADDRESS)///////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	
+	 async function displayParcelasPropietario(propietario) {
+	 
+	 var listaParcelas = await getlistParcelasPropietario(propietario);
+	 var id=0;
+	 var listaPestizidas= new Array();
+	 
+	 
+	 
+	 var text=`
+	  <table class="mui-table mui-table--bordered">
+		<thead>
+		<tr>
+		<th valign="middle" style="color:#0000FF">PARCELAS vinculadas a : ${propietario} </th>
+		</tr>
+		</thead>
+	  </table>
+	<table class="mui-table mui-table--bordered">
+		<thead>
+		<tr>
+		<th>Id</th>
+		<th>Altura máx.</th>
+		<th>Altura mín.</th>
+		<th>Superficie (m2) </th>
+		<th>Pestizidas</th>
+		</tr>
+		</thead>
+		<tbody> `;
+       
+		var text2="";
+	 
+
+		for (let i = 0; i < listaParcelas.length ; i++) {
+
+          // Busca todos las parcelas del propietario. Devuelve un objeto `parcela` object
+          id = listaParcelas[i];
+		  await getParcelaDetalles(id)
+          .then(async function(parcela) {
+			listaPestizidas = await getListaPestizidasParcelas (id);
+			text2=`
+			<tr>
+                <td>${id}</td>
+                <td>${parcela.alturamax}</td>
+				<td>${parcela.alturamin}</td>
+				<td>${parcela.m2superfice}</td>
+				<td>${listaPestizidas} </td>	
+            </tr>`;
+			
+		    text = await (text.concat(" ", text2));
+					
+          });
+        }
+		var text3=`</tbody>
+	    </table>`;
+		text = await (text.concat(" ", text3));
+		
+		$("#listaParcelas").empty();
+		$("#listaParcelas").append(text);
+
+	}
+	
+	async function pintarBalance(cuenta)
+	{
+	
+	 var balance = await balanceUsuario(cuenta);
+	 balance= balance / 1000000000000000000;
+	 balance=balance.toFixed(0);
+	 	 
+	 var text=`
+	  <table class="mui-table mui-table--bordered">
+		<thead>
+		<tr>
+		<th valign="middle" style="color:#0000FF">Balance FUM TOKEN: ${balance} </th>
+		</tr>
+		</thead>
+	  </table>`;
+		$("#balanceERC20").empty();
+		$("#balanceERC20").append(text);
+	
+	}
+	
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	
+	
+	function eventoClicDron()
+	{
+		altaDron(frmDron.alturaMax.value, frmDron.alturaMin.value, frmDron.m2porminuto.value, frmDron.autonomia.value, frmDron.costeVuelo.value);
+		
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	
+	function eventoClicParcela()
+	{
+		altaParcela(frmParcela.alturaMax.value, frmParcela.alturaMin.value, frmParcela.m2superficie.value);
+		
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	
+	function eventoCompatibilidadDronParcela()
+	{
+		console.log("Entro en compatibilidad", frmAcciones.idDron.value);
+		console.log("Parcela", frmAcciones.idParcela.value);
+		
+		compatibilidadDronParcela(frmAcciones.idDron.value, frmAcciones.idParcela.value);
+		
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	
+	
+	function eventoCosteFumigacionDronParcela()
+	{
+		costeFumigacionDronParcela(frmAcciones.idDron.value, frmAcciones.idParcela.value);
+		
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	
+	function eventoCosteFumigacionDronParcela()
+	{
+		costeFumigacionDronParcela(frmAcciones.idDron.value, frmAcciones.idParcela.value);
+		
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	
+	function eventoDisponiblidadDron()
+	{
+		disponiblidadDron(frmAcciones.idDron.value);
+		
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	
+	function eventoContratarFumigacion()
+	{
+	
+		
+		contratarFumigacion(frmAcciones.idDron.value, frmAcciones.idParcela.value,frmAcciones.idFerti.value);
+		
+		event.preventDefault();
+		event.stopPropagation();
+
+	
+	}
+	
+	function eventoFumigar()
+	{
+		fumigar(frmAcciones.idDron.value, frmAcciones.idParcela.value);
+		
+		event.preventDefault();
+		event.stopPropagation();
+	}
+	
+	
+	
+	
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+					
+  </script>
+  
+  <div class="mui-container" id="cabecera">
+	<div class="mui-panel">
+	<h3 id="encabezado" valign="middle"  style="color:#0000FF">            WEB FUMIGASA (ACCESO OWNER)                   </h2>
+  
+  </div> 
+  
+  <div class="mui-container" id="balanceERC20">
+  
+  </div>
+  <div class="mui-container" id="listaDrones"></div>
+  <div class="mui-container" id="separacion"></div>
+  <div class="mui-container" id="listaParcelas"></div>
+
+	
+  <div class="mui-container" id="AltaDron">
+  <div class="mui-panel">
+   <h2>Nuevo Dron</h2>
+	<form id="frmDron" name="frmDron" method="post" action="" class="mui-form">
+	  <div class="mui-textfield">
+		<input type="text" name="alturaMaxDron" id="alturaMax" value="">
+		<label>Altura Máxima</label>
+		</div>
+		
+		<div class="mui-textfield">
+			<input type="text" name="alturaMinDron" id="alturaMin" value="">
+			<label>Altura Minima</label>
+		</div>
+		
+		<div class="mui-textfield">
+			<input type="text" name="costeVuelo" id="costeVuelo" value="">
+			<label>Coste (por vuelo):</label>
+		</div>
+		
+		<div class="mui-textfield">
+			<input type="text" name="autonomia" id="autonomia" size="7" maxlength="" value="">
+			<label>Autonomia:</label>
+		</div>
+		
+		<div class="mui-textfield">
+  		<input type="text" name="m2porminuto" id="m2porminuto" value=""> <br>		
+  		<label>M2 por minuto:</label>
+  	</div>
+		
+		<div class="mui-checkbox">
+		<label>	Pesticidas que suministra: </label>
+		<label>
+      <input name="fertilizanteDron" type="checkbox" value="1">
+      A
+    </label>
+    <label>
+      <input name="fertilizanteDron" type="checkbox" value="2">
+      B
+    </label>
+    <label>
+      <input name="fertilizanteDron" type="checkbox" value="3">
+      C
+    </label>
+    <label>
+      <input name="fertilizanteDron" type="checkbox" value="4">
+      D
+    </label>
+    <label>
+      <input name="fertilizanteDron" type="checkbox" value="5">
+      E
+    </label>
+    
+    </div>
+		<button class="mui-btn mui-btn--primary mui-btn--raised" 
+                                onClick={eventoClicDron()}  >Alta Dron</button>
+		
+	</form>
+	</div>	
+	</div>
+	
+	
+	
+	
+	<div class="mui-container" id="Acciones">
+	<div class="mui-panel">
+	<h2 id="encabezado">Acciones:</h2>
+
+	<form id="frmAcciones" name="frmAcciones" method="post" action="" class="mui-form">
+	
+		<div class="mui-textfield">
+			<input type="text" name="idDron" id="idDron" value="" size="4">
+			<label>Id Dron:</label> 
+			
+		</div>
+		<div class="mui-textfield">
+			<label>Id Parcela:</label>	
+			<input type="text" name="idParcela" id="idParcela" value="" size="4">
+			
+		</div>
+		<div class="mui-textfield">
+			<label>Id Pestizida:</label>	
+			<input type="text" name="idFerti" id="idFerti" value="" size="2">
+			
+		</div>
+		
+		
+		<button class="mui-btn mui-btn--primary mui-btn--raised" onClick={eventoCompatibilidadDronParcela()}  >Compatibilidad</button>
+		<button class="mui-btn mui-btn--primary mui-btn--raised" onClick={eventoCosteFumigacionDronParcela()}  >Calcular coste Dron/Parcela</button>
+		<button class="mui-btn mui-btn--primary mui-btn--raised" onClick={eventoDisponiblidadDron()}  >Disponiblidad Dron</button>	
+		<button class="mui-btn mui-btn--primary mui-btn--raised" onClick={eventoContratarFumigacion()}  >Contratar Fumigación</button>		
+		<button class="mui-btn mui-btn--primary mui-btn--raised" onClick={eventoFumigar()}  >Fumigar</button>	
+				
+		<div class="mui-textfield">
+			<label>RESULTADO ACCION:</label>	
+			<input type="text" name="idResult" id="idResult" value="" size="small">
+		</div>
+				
+	</form>
+	</div>	
+	
+		
+      <form name="identidad">
+	 
+           
+        </form>
+
+      <div id="console"></div>
+	  
+	  <div id="resultados"> </div>
+	  
+    </body>
+</html>
+
+
